@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Registrar pagamento — AulaCerta{% endblock %}
+{% block content %}
+<h2 class="mb-4">Registrar pagamento</h2>
+<p class="text-muted">
+    Aluno: <strong>{{ mensalidade.aluno.nome }}</strong> —
+    Competência: {{ mensalidade.competencia|date:"m/Y" }} —
+    Saldo atual: <strong>R$ {{ mensalidade.saldo }}</strong>
+</p>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Valor recebido (R$) *</label>
+            {{ form.valor_pago }}
+            <div class="text-danger small">{{ form.valor_pago.errors }}</div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Forma de pagamento</label>
+            {{ form.forma_pagamento }}
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Data do pagamento</label>
+            {{ form.data_pagamento }}
+        </div>
+        <div class="col-12">
+            <label class="form-label">Observações</label>
+            {{ form.observacoes }}
+        </div>
+    </div>
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">Confirmar pagamento</button>
+        <a href="{% url 'financeiro:mensalidades' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

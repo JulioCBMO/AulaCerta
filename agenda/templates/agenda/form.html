@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — AulaCerta{% endblock %}
+{% block content %}
+<h2 class="mb-4">{{ titulo }}</h2>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Aluno *</label>
+            {{ form.aluno }}
+            <div class="text-danger small">{{ form.aluno.errors }}</div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Modalidade</label>
+            {{ form.modalidade }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Duração (min)</label>
+            {{ form.duracao_minutos }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Data e horário de início *</label>
+            {{ form.data_hora_inicio }}
+            <div class="text-danger small">{{ form.data_hora_inicio.errors }}</div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Agendar</button>
+        <a href="{% url 'agenda:listar' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Alunos — AulaCerta{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Alunos cadastrados</h2>
+    <a href="{% url 'alunos:cadastrar' %}" class="btn btn-primary">+ Novo aluno</a>
+</div>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-4">
+        {{ filtro_form.nome }}
+    </div>
+    <div class="col-md-3">
+        {{ filtro_form.situacao }}
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
+    </div>
+</form>
+
+<table class="table table-striped bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Disciplina</th>
+            <th>Situação</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for aluno in page_obj %}
+        <tr>
+            <td>{{ aluno.nome }}</td>
+            <td>{{ aluno.telefone }}</td>
+            <td>{{ aluno.disciplina|default:"—" }}</td>
+            <td>
+                <span class="badge {% if aluno.situacao == 'ATIVO' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ aluno.get_situacao_display }}
+                </span>
+            </td>
+            <td><a href="{% url 'alunos:detalhe' aluno.pk %}" class="btn btn-sm btn-outline-secondary">Ver</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">Nenhum aluno encontrado.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

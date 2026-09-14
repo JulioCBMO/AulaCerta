@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Mensalidades — AulaCerta{% endblock %}
+{% block content %}
+<h2 class="mb-4">Mensalidades / cobranças</h2>
+<p class="text-muted">O lançamento de novas mensalidades e a geração automática a partir do contrato estão previstos para a Sprint 03. Nesta sprint, o professor pode registrar pagamentos sobre mensalidades já lançadas.</p>
+
+<table class="table table-striped bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>Aluno</th>
+            <th>Competência</th>
+            <th>Valor total</th>
+            <th>Saldo</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in mensalidades %}
+        <tr>
+            <td>{{ m.aluno.nome }}</td>
+            <td>{{ m.competencia|date:"m/Y" }}</td>
+            <td>R$ {{ m.valor_total }}</td>
+            <td>R$ {{ m.saldo }}</td>
+            <td>{{ m.data_vencimento|date:"d/m/Y" }}</td>
+            <td>
+                <span class="badge {% if m.status == 'PAGO' %}bg-success{% elif m.status == 'VENCIDO' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                    {{ m.get_status_display }}
+                </span>
+            </td>
+            <td>
+                {% if m.status != 'PAGO' %}
+                <a href="{% url 'financeiro:pagar' m.pk %}" class="btn btn-sm btn-success">Registrar pagamento</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted">Nenhuma mensalidade lançada ainda (use o Django Admin).</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

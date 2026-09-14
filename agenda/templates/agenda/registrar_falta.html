@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Registrar falta — AulaCerta{% endblock %}
+{% block content %}
+<h2 class="mb-4">Registrar falta</h2>
+<p class="text-muted">Aluno: {{ aula.aluno.nome }} — {{ aula.data_hora_inicio|date:"d/m/Y H:i" }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-check mb-3">
+        {{ form.justificada }}
+        <label class="form-check-label">{{ form.justificada.label }}</label>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Observações</label>
+        {{ form.observacoes }}
+    </div>
+    <button type="submit" class="btn btn-warning">Registrar falta</button>
+    <a href="{% url 'agenda:detalhe' aula.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+</form>
+{% endblock %}

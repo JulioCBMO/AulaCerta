@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ aluno.nome }} — AulaCerta{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ aluno.nome }}</h2>
+    <a href="{% url 'alunos:editar' aluno.pk %}" class="btn btn-outline-primary">Editar</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Dados cadastrais</h5>
+                <p class="mb-1"><strong>CPF:</strong> {{ aluno.cpf }}</p>
+                <p class="mb-1"><strong>Telefone:</strong> {{ aluno.telefone }}</p>
+                <p class="mb-1"><strong>E-mail:</strong> {{ aluno.email|default:"—" }}</p>
+                <p class="mb-1"><strong>Disciplina:</strong> {{ aluno.disciplina|default:"—" }}</p>
+                <p class="mb-1"><strong>Situação:</strong> {{ aluno.get_situacao_display }}</p>
+                <p class="mb-0"><strong>Saldo devedor:</strong> R$ {{ aluno.saldo_devedor }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Próximas aulas</h5>
+                <ul class="list-group list-group-flush">
+                    {% for aula in proximas_aulas %}
+                        <li class="list-group-item">{{ aula.data_hora_inicio|date:"d/m/Y H:i" }} — {{ aula.get_modalidade_display }}</li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Nenhuma aula agendada.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="{% url 'alunos:listar' %}" class="btn btn-link">&larr; Voltar para a lista</a>
+{% endblock %}

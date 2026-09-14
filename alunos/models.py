@@ -1,0 +1,104 @@
+import re
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+
+
+def validar_cpf_formato(value):
+    """Valida que o CPF contém 11 dígitos numéricos (com ou sem máscara)."""
+    digitos = re.sub(r"\D", "", value or "")
+    if len(digitos) != 11:
+        raise ValidationError("CPF deve conter 11 dígitos.")
+
+
+class Aluno(models.Model):
+    """
+    Task 31762 — Modelagem da Tabela de Alunos e índices de busca.
+
+    Critérios de aceite implementados (US-30321 "Cadastrar aluno"):
+    CA-CAD-01: unicidade do CPF por professor, com erro 409/ValidationError
+               em caso de duplicidade.
+    CA-CAD-02: Nome, CPF e Contato (telefone) são obrigatórios.
+    CA-CAD-03: sanitização (trim) do nome para remover espaços redundantes.
+    """
+
+    class Situacao(models.TextChoices):
+        ATIVO = "ATIVO", "Ativo"
+        INATIVO = "INATIVO", "Inativo"
+
+    professor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="alunos"
+    )
+
+    nome = models.CharField(max_length=150)
+    cpf = models.CharField(max_length=14, validators=[validar_cpf_formato])
+    telefone = models.CharField(max_length=20)
+    email = models.EmailField(blank=True)
+
+    data_nascimento = models.DateField(null=True, blank=True)
+    endereco = models.CharField(max_length=255, blank=True)
+
+    disciplina = models.CharField(max_length=100, blank=True)
+    serie_nivel = models.CharField(max_length=100, blank=True)
+    escola = models.CharField(max_length=150, blank=True)
+    observacoes = models.TextField(blank=True)
+
+    responsavel_nome = models.CharField(max_length=150, blank=True)
+    responsavel_telefone = models.CharField(max_length=20, blank=True)
+    responsavel_email = models.EmailField(blank=True)
+    responsavel_parentesco = models.CharField(max_length=50, blank=True)
+
+    valor_hora = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True,
+        help_text="Se vazio, usa o valor-hora padrão do professor.",
+    )
+    saldo_devedor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    situacao = models.CharField(
+        max_length=10, choices=Situacao.choices, default=Situacao.ATIVO
+    )
+    data_cadastro = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["professor", "cpf"], name="uniq_cpf_por_professor"
+            )
+        ]
+        indexes = [
+            models.Index(fields=["professor", "nome"], name="idx_aluno_professor_nome"),
+            models.Index(fields=["professor", "situacao"], name="idx_aluno_professor_situacao"),
+        ]
+
+    def __str__(self):
+        return self.nome
+
+    def clean(self):
+        # CA-CAD-03: sanitização de strings (trim + colapso de espaços)
+        if self.nome:
+            self.nome = re.sub(r"\s+", " ", self.nome).strip()
+        if self.cpf:
+            self.cpf = re.sub(r"\D", "", self.cpf)
+
+        # CA-CAD-02: campos obrigatórios
+        if not self.nome:
+            raise ValidationError({"nome": "O nome é obrigatório."})
+        if not self.cpf:
+            raise ValidationError({"cpf": "O CPF é obrigatório."})
+        if not self.telefone:
+            raise ValidationError({"telefone": "O contato (telefone) é obrigatório."})
+
+        # CA-CAD-01: unicidade do CPF por professor
+        if self.professor_id and self.cpf:
+            duplicado = Aluno.objects.filter(
+                professor_id=self.professor_id, cpf=self.cpf
+            ).exclude(pk=self.pk)
+            if duplicado.exists():
+                raise ValidationError(
+                    {"cpf": "Já existe um aluno cadastrado com este CPF."}
+                )
+
+    def is_ativo(self):
+        return self.situacao == self.Situacao.ATIVO

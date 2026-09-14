@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — AulaCerta{% endblock %}
+{% block content %}
+<h2 class="mb-4">{{ titulo }}</h2>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Nome *</label>
+            {{ form.nome }}
+            <div class="text-danger small">{{ form.nome.errors }}</div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">CPF *</label>
+            {{ form.cpf }}
+            <div class="text-danger small">{{ form.cpf.errors }}</div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Situação</label>
+            {{ form.situacao }}
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Telefone (contato) *</label>
+            {{ form.telefone }}
+            <div class="text-danger small">{{ form.telefone.errors }}</div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">E-mail</label>
+            {{ form.email }}
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Data de nascimento</label>
+            {{ form.data_nascimento }}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Disciplina</label>
+            {{ form.disciplina }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Série/nível</label>
+            {{ form.serie_nivel }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Escola</label>
+            {{ form.escola }}
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Nome do responsável</label>
+            {{ form.responsavel_nome }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Telefone do responsável</label>
+            {{ form.responsavel_telefone }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">E-mail do responsável</label>
+            {{ form.responsavel_email }}
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Parentesco</label>
+            {{ form.responsavel_parentesco }}
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Valor-hora (R$)</label>
+            {{ form.valor_hora }}
+        </div>
+
+        <div class="col-12">
+            <label class="form-label">Observações</label>
+            {{ form.observacoes }}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'alunos:listar' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,13 @@
+from django.urls import path
+
+from . import views
+
+app_name = "agenda"
+
+urlpatterns = [
+    path("", views.listar_agenda, name="listar"),
+    path("nova/", views.criar_agendamento, name="criar"),
+    path("<int:pk>/", views.detalhe_aula, name="detalhe"),
+    path("<int:pk>/registrar/", views.registrar_aula_realizada, name="registrar"),
+    path("<int:pk>/falta/", views.registrar_falta, name="registrar_falta"),
+]

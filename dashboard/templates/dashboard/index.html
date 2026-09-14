@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Painel — AulaCerta{% endblock %}
+{% block content %}
+<h2 class="mb-4">Painel — {{ mes_referencia|date:"F/Y" }}</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-bg-primary shadow-sm">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Alunos ativos</h6>
+                <p class="display-6 mb-0">{{ total_alunos_ativos }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-success shadow-sm">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Aulas realizadas no mês</h6>
+                <p class="display-6 mb-0">{{ aulas_realizadas_mes }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-warning shadow-sm">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Índice de inadimplência</h6>
+                <p class="display-6 mb-0">{{ indice_inadimplencia }}%</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Faturamento gerado (mês)</h6>
+                <p class="fs-3 mb-0">R$ {{ faturamento_gerado }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Valor pendente</h6>
+                <p class="fs-3 mb-0">R$ {{ valor_pendente }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Alunos inadimplentes</h6>
+                <p class="fs-3 mb-0">{{ total_inadimplentes }}</p>
+                <a href="{% url 'financeiro:inadimplentes' %}" class="small">Ver detalhes &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <a href="{% url 'alunos:listar' %}" class="btn btn-outline-primary">Alunos</a>
+    <a href="{% url 'agenda:listar' %}" class="btn btn-outline-primary">Agenda</a>
+    <a href="{% url 'financeiro:mensalidades' %}" class="btn btn-outline-primary">Financeiro</a>
+</div>
+{% endblock %}
