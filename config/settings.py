@@ -139,12 +139,20 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # diretamente pelo processo do Gunicorn, com hashing e compressão,
 # dispensando um servidor de arquivos estáticos separado (nginx/CDN)
 # no ambiente de homologação gratuito.
+#
+# O storage com manifest (hashing de nomes de arquivo) só é usado em
+# produção: ele exige que "collectstatic" já tenha rodado, o que
+# atrapalharia rodar testes/servidor local sem esse passo manual.
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 

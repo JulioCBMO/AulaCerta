@@ -1,56 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Painel — AulaCerta{% endblock %}
 {% block content %}
-<h2 class="mb-4">Painel — {{ mes_referencia|date:"F/Y" }}</h2>
+<h2>Painel — {{ mes_referencia|date:"F/Y" }}</h2>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card text-bg-primary shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2">Alunos ativos</h6>
-                <p class="display-6 mb-0">{{ total_alunos_ativos }}</p>
-            </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+            <div class="stat-card__label">Alunos ativos</div>
+            <div class="stat-card__value">{{ total_alunos_ativos }}</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-bg-success shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2">Aulas realizadas no mês</h6>
-                <p class="display-6 mb-0">{{ aulas_realizadas_mes }}</p>
-            </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="stat-card stat-card--erva">
+            <div class="stat-card__label">Aulas realizadas no mês</div>
+            <div class="stat-card__value">{{ aulas_realizadas_mes }}</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-bg-warning shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2">Índice de inadimplência</h6>
-                <p class="display-6 mb-0">{{ indice_inadimplencia }}%</p>
-            </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="stat-card stat-card--ambar">
+            <div class="stat-card__label">Índice de inadimplência</div>
+            <div class="stat-card__value">{{ indice_inadimplencia }}%</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Faturamento gerado (mês)</h6>
-                <p class="fs-3 mb-0">R$ {{ faturamento_gerado }}</p>
-            </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="stat-card stat-card--giz">
+            <div class="stat-card__label">Faturamento gerado (mês)</div>
+            <div class="stat-card__value">R$ {{ faturamento_gerado }}</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Valor pendente</h6>
-                <p class="fs-3 mb-0">R$ {{ valor_pendente }}</p>
-            </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+            <div class="stat-card__label">Valor pendente</div>
+            <div class="stat-card__value">R$ {{ valor_pendente }}</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Alunos inadimplentes</h6>
-                <p class="fs-3 mb-0">{{ total_inadimplentes }}</p>
-                <a href="{% url 'financeiro:inadimplentes' %}" class="small">Ver detalhes &rarr;</a>
-            </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="stat-card stat-card--terra">
+            <div class="stat-card__label">Alunos inadimplentes</div>
+            <div class="stat-card__value">{{ total_inadimplentes }}</div>
+            <a href="{% url 'financeiro:inadimplentes' %}" class="stat-card__link">Ver detalhes &rarr;</a>
         </div>
     </div>
 </div>

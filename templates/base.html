@@ -6,44 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AulaCerta{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/[email protected]/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/aulacerta.css' %}" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 {% if user.is_authenticated %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'dashboard:index' %}">AulaCerta</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-            <span class="navbar-toggler-icon"></span>
+<div class="app-shell">
+
+    <div class="app-topbar d-md-none">
+        <button class="app-topbar__toggle" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#appSidebarOffcanvas" aria-controls="appSidebarOffcanvas" aria-label="Abrir menu">
+            <span></span><span></span><span></span>
         </button>
-        <div class="collapse navbar-collapse" id="nav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:index' %}">Painel</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'alunos:listar' %}">Alunos</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'agenda:listar' %}">Agenda</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'financeiro:inadimplentes' %}">Financeiro</a></li>
-            </ul>
-            <form action="{% url 'logout' %}" method="post" class="d-flex">
-                {% csrf_token %}
-                <span class="navbar-text text-white me-3">{{ user.get_username }}</span>
-                <button class="btn btn-outline-light btn-sm" type="submit">Sair</button>
-            </form>
+        <a class="app-topbar__brand" href="{% url 'dashboard:index' %}">AulaCerta</a>
+    </div>
+
+    <aside class="app-sidebar d-none d-md-flex">
+        {% include "partials/_sidebar_nav.html" %}
+    </aside>
+
+    <div class="offcanvas offcanvas-start app-sidebar app-sidebar--offcanvas d-md-none"
+         tabindex="-1" id="appSidebarOffcanvas" aria-labelledby="appSidebarOffcanvasLabel">
+        <div class="offcanvas-body d-flex flex-column p-0">
+            {% include "partials/_sidebar_nav.html" %}
         </div>
     </div>
-</nav>
+
+    <main class="app-main"><div class="app-main__inner">
+{% else %}
+<main class="auth-shell">
 {% endif %}
 
-<div class="container pb-5">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
 
-    {% block content %}{% endblock %}
+{% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+    </div></main>
 </div>
+{% else %}
+</main>
+{% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/[email protected]/dist/js/bootstrap.bundle.min.js"></script>
 </body>
