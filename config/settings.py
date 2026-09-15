@@ -4,14 +4,34 @@ Configurações do projeto AulaCerta.
 Sprint 01 — Atividade auxiliar "US - Configurar ambiente inicial do projeto"
 e "US - Criar estrutura inicial do banco de dados".
 """
+import os
 from pathlib import Path
+
+import dj_database_url
 from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="dev-secret-key-nao-use-em-producao")
-DEBUG = config("DEBUG", default=True, cast=bool)
+# Por segurança, DEBUG é False por padrão: em desenvolvimento local,
+# defina DEBUG=True explicitamente no seu .env.
+DEBUG = config("DEBUG", default=False, cast=bool)
+
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
+
+# O Render injeta automaticamente RENDER_EXTERNAL_HOSTNAME (algo como
+# "aulacerta.onrender.com") em todo Web Service. Adicionamos esse host
+# automaticamente para não precisar repeti-lo manualmente na variável
+# ALLOWED_HOSTS do painel do Render.
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# O Render também envia requisições internas de health-check; liberamos
+# CSRF para o domínio externo, exigido pelo Django 4+ ao usar HTTPS.
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -31,6 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -60,9 +81,26 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Banco de dados: PostgreSQL 16, conforme definido na proposta técnica.
-# Para rodar testes locais sem subir o container do Postgres, defina
-# a variável de ambiente USE_SQLITE=True.
-if config("USE_SQLITE", default=False, cast=bool):
+#
+# Prioridade de configuração:
+#   1. DATABASE_URL (formato "postgres://usuario:senha@host:porta/nome"),
+#      que é a variável fornecida automaticamente pelo Render ao conectar
+#      um banco PostgreSQL gerenciado a um Web Service.
+#   2. USE_SQLITE=True — apenas para rodar testes locais sem subir o
+#      container do Postgres.
+#   3. Variáveis DB_NAME/DB_USER/DB_PASSWORD/DB_HOST/DB_PORT, usadas pelo
+#      docker-compose.yml em desenvolvimento local.
+DATABASE_URL = config("DATABASE_URL", default="")
+
+if DATABASE_URL:
+    # ssl_require=False porque a "Internal Database URL" fornecida pelo
+    # Render (banco e web service na mesma rede privada) não usa/precisa
+    # de SSL. Se você usar a "External Database URL" em algum cenário,
+    # inclua "?sslmode=require" diretamente na própria DATABASE_URL.
+    DATABASES = {
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
+    }
+elif config("USE_SQLITE", default=False, cast=bool):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -97,8 +135,30 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# WhiteNoise: serve os arquivos estáticos coletados (collectstatic)
+# diretamente pelo processo do Gunicorn, com hashing e compressão,
+# dispensando um servidor de arquivos estáticos separado (nginx/CDN)
+# no ambiente de homologação gratuito.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard:index"
 LOGOUT_REDIRECT_URL = "login"
+
+# Segurança para produção. O Render fica atrás de um proxy HTTPS, então
+# confiamos no cabeçalho X-Forwarded-Proto para saber quando a conexão
+# original já era segura (evita loop de redirecionamento).
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

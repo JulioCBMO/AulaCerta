@@ -45,31 +45,86 @@ Faça login em `http://localhost:8000/login/` com o usuário criado.
 
 ## Como rodar localmente (sem Docker)
 
-Requer Python 3.12 ou 3.13 e um PostgreSQL local, ou use SQLite apenas
-para desenvolvimento/teste definindo `USE_SQLITE=True`. No Windows, os
-comandos abaixo funcionam no PowerShell e não dependem da ativação do
-ambiente virtual:
+Requer Python 3.12 e um PostgreSQL local, ou use SQLite apenas para
+desenvolvimento/teste definindo `USE_SQLITE=True`.
 
-```powershell
-py -3.13 -m venv venv
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 
-$env:USE_SQLITE = "True"   # ou configure DB_* no .env para usar Postgres
-$env:SECRET_KEY = "dev-key"
+export USE_SQLITE=True   # ou configure DB_* no .env para usar Postgres
+export SECRET_KEY=dev-key
+export DEBUG=True        # por padrão DEBUG é False (seguro para produção)
 
-.\venv\Scripts\python.exe manage.py migrate
-.\venv\Scripts\python.exe manage.py createsuperuser
-.\venv\Scripts\python.exe manage.py runserver
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
 ```
 
-Se preferir ativar o ambiente virtual, use `.\venv\Scripts\Activate.ps1`
-e depois execute `python` e `pip` normalmente.
+## Deploy em produção (Render — gratuito)
+
+O projeto já está preparado para deploy no [Render](https://render.com),
+conforme definido na Proposta de Projeto (item 5.7). Arquivos relevantes:
+
+- `requirements.txt` — inclui `gunicorn` (servidor WSGI de produção),
+  `whitenoise` (serve os arquivos estáticos sem precisar de nginx/CDN)
+  e `dj-database-url` (lê a `DATABASE_URL` fornecida pelo Render).
+- `build.sh` — instala dependências, roda `collectstatic` e `migrate`
+  a cada deploy.
+- `render.yaml` — Blueprint que cria o banco PostgreSQL e o Web Service
+  automaticamente.
+
+### Opção A — Deploy automático via Blueprint (mais rápido)
+
+1. Suba o projeto para um repositório no GitHub.
+2. No painel do Render: **New +** → **Blueprint** → selecione o
+   repositório. O Render lê o `render.yaml`, cria o banco PostgreSQL
+   gratuito e o Web Service já conectados entre si, e gera uma
+   `SECRET_KEY` aleatória automaticamente.
+3. Aguarde o build (instala dependências, roda `collectstatic` e
+   `migrate`). Ao final, acesse a URL `https://aulacerta-web.onrender.com`.
+4. Abra a aba **Shell** do Web Service no painel do Render e rode:
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+### Opção B — Deploy manual (passo a passo)
+
+1. **New +** → **PostgreSQL** → plano *Free*. Copie a **Internal
+   Database URL** gerada.
+2. **New +** → **Web Service** → conecte o repositório.
+   - Build Command: `bash build.sh`
+   - Start Command: `gunicorn config.wsgi:application`
+3. Em **Environment**, adicione:
+   - `SECRET_KEY` — gere uma nova (nunca reaproveite a de desenvolvimento)
+   - `DEBUG` = `False`
+   - `DATABASE_URL` — a Internal Database URL copiada no passo 1
+4. Clique em **Create Web Service** e aguarde o primeiro deploy.
+5. Crie o professor de teste pela aba **Shell**:
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+### Observações importantes sobre o plano gratuito do Render
+
+- O Web Service gratuito "dorme" após 15 minutos sem receber
+  requisições; a primeira requisição seguinte demora ~1 minuto para
+  responder (cold start). Isso é aceitável para o ambiente de
+  homologação do projeto (não é um requisito de produção real).
+- O banco PostgreSQL gratuito expira 30 dias após a criação, com 14
+  dias de carência para você fazer upgrade ou exportar os dados antes
+  da exclusão definitiva. Para uma disciplina de um semestre, pode ser
+  necessário recriar o banco (ou fazer upgrade) perto do fim do prazo.
+- Uploads de arquivo gravados no disco local do Web Service **não são
+  persistidos** entre deploys (sistema de arquivos efêmero). Nenhuma
+  funcionalidade da Sprint 01 depende de upload de arquivos, então
+  isso não afeta o escopo atual.
 
 ## Rodando os testes automatizados
 
-```powershell
-$env:USE_SQLITE = "True"
-$env:SECRET_KEY = "teste"
+```bash
+export USE_SQLITE=True SECRET_KEY=teste
 python -m pytest -v
 ```
 
