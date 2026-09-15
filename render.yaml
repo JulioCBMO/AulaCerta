@@ -31,3 +31,13 @@ services:
           property: connectionString
       - key: PYTHON_VERSION
         value: "3.12.7"
+         # Preenchidas manualmente pelo painel do Render (Environment),
+      # nunca versionadas no repositório. Usadas pelo comando
+      # create_default_superuser durante o build (ver build.sh),
+      # já que o plano gratuito não dá acesso a Shell interativo.
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
