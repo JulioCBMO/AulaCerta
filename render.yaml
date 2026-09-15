@@ -1,0 +1,33 @@
+# Blueprint do Render (Infrastructure as Code).
+#
+# Como usar: no painel do Render, clique em "New +" > "Blueprint" e
+# aponte para este repositório. O Render lê este arquivo e cria
+# automaticamente o banco de dados e o Web Service abaixo, já
+# conectados entre si pela variável DATABASE_URL.
+#
+# Documentação: https://render.com/docs/blueprint-spec
+
+databases:
+  - name: aulacerta-db
+    plan: free
+    databaseName: aulacerta
+    user: aulacerta
+
+services:
+  - type: web
+    name: aulacerta-web
+    runtime: python
+    plan: free
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aulacerta-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: "3.12.7"
