@@ -1,0 +1,30 @@
+{% load static %}
+<a href="{% url 'dashboard:index' %}" class="app-sidebar__brand">AulaCerta</a>
+<p class="app-sidebar__tagline">Gestão de aulas particulares</p>
+
+<ul class="app-sidebar__nav">
+    <li>
+        <a class="app-sidebar__link{% if request.resolver_match.app_name == 'dashboard' %} is-active{% endif %}"
+           href="{% url 'dashboard:index' %}">Painel</a>
+    </li>
+    <li>
+        <a class="app-sidebar__link{% if request.resolver_match.app_name == 'alunos' %} is-active{% endif %}"
+           href="{% url 'alunos:listar' %}">Alunos</a>
+    </li>
+    <li>
+        <a class="app-sidebar__link{% if request.resolver_match.app_name == 'agenda' %} is-active{% endif %}"
+           href="{% url 'agenda:listar' %}">Agenda</a>
+    </li>
+    <li>
+        <a class="app-sidebar__link{% if request.resolver_match.app_name == 'financeiro' %} is-active{% endif %}"
+           href="{% url 'financeiro:inadimplentes' %}">Financeiro</a>
+    </li>
+</ul>
+
+<div class="app-sidebar__footer">
+    <div class="app-sidebar__user">{{ user.get_username }}</div>
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button class="btn btn-outline-secondary btn-sm btn-logout" type="submit">Sair</button>
+    </form>
+</div>
