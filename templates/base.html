@@ -5,25 +5,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AulaCerta{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/[email protected]/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {# Bootstrap 5.3.3 — cdnjs (Cloudflare) #}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    {# CSS próprio do projeto #}
     <link href="{% static 'css/aulacerta.css' %}" rel="stylesheet">
 </head>
 <body>
+
 {% if user.is_authenticated %}
 <div class="app-shell">
 
+    {# Topbar visível apenas em telas pequenas (mobile) #}
     <div class="app-topbar d-md-none">
         <button class="app-topbar__toggle" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#appSidebarOffcanvas" aria-controls="appSidebarOffcanvas" aria-label="Abrir menu">
+                data-bs-target="#appSidebarOffcanvas" aria-controls="appSidebarOffcanvas"
+                aria-label="Abrir menu">
             <span></span><span></span><span></span>
         </button>
         <a class="app-topbar__brand" href="{% url 'dashboard:index' %}">AulaCerta</a>
     </div>
 
-    <aside class="app-sidebar d-none d-md-flex">
+    {# Sidebar fixa (desktop) — só aparece a partir do breakpoint md #}
+    <aside class="app-sidebar d-none d-md-flex flex-column">
         {% include "partials/_sidebar_nav.html" %}
     </aside>
 
+    {# Sidebar offcanvas (mobile) — só aparece abaixo do breakpoint md #}
     <div class="offcanvas offcanvas-start app-sidebar app-sidebar--offcanvas d-md-none"
          tabindex="-1" id="appSidebarOffcanvas" aria-labelledby="appSidebarOffcanvasLabel">
         <div class="offcanvas-body d-flex flex-column p-0">
@@ -54,6 +64,7 @@
 </main>
 {% endif %}
 
-<script src="https://cdn.jsdelivr.net/npm/[email protected]/dist/js/bootstrap.bundle.min.js"></script>
+{# Bootstrap JS bundle (inclui Popper) — cdnjs #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
