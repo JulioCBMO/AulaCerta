@@ -62,6 +62,34 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+## Dados de demonstração — Task 31780
+
+Depois de aplicar as migrations, use o comando abaixo para criar um
+conjunto coerente de dados da Sprint 01:
+
+```bash
+export AULACERTA_SEED_PASSWORD="uma-senha-local"
+python manage.py seed_sprint1
+```
+
+No PowerShell, defina a senha com:
+
+```powershell
+$env:AULACERTA_SEED_PASSWORD = "uma-senha-local"
+python manage.py seed_sprint1
+```
+
+O comando cria ou atualiza o usuário `demo_sprint1`, três alunos, duas
+aulas, três mensalidades e dois pagamentos. Ele é idempotente: pode ser
+executado novamente sem duplicar esses registros. Se a variável de senha
+não for definida na primeira execução, o usuário será criado sem senha
+utilizável, mas os dados continuarão disponíveis para inspeção pelo Admin.
+
+As constraints da Task 31780 protegem também no banco de dados a duração
+positiva da aula, os valores positivos de mensalidade e pagamento, o saldo
+devedor não negativo e o valor-hora nulo ou positivo. A unicidade do CPF por
+professor já era garantida e também possui cobertura de teste no banco.
+
 ## Deploy em produção (Render — gratuito)
 
 O projeto já está preparado para deploy no [Render](https://render.com),
@@ -141,6 +169,8 @@ descritos no backlog para cada User Story da Sprint 01:
 - `financeiro/tests.py` — CA-PAG-01 (valor positivo), CA-PAG-02 (baixa
   transacional com recálculo de saldo) e CA-INA-01/02 (identificação e
   agregação de inadimplência).
+- `dashboard/tests.py` — Task 31780 (criação dos dados da Sprint 01 e
+  idempotência do comando `seed_sprint1`).
 
 ## Observações de escopo (o que fica para as próximas sprints)
 

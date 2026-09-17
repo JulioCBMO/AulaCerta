@@ -65,7 +65,15 @@ class Aluno(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["professor", "cpf"], name="uniq_cpf_por_professor"
-            )
+            ),
+            models.CheckConstraint(
+                check=models.Q(saldo_devedor__gte=0),
+                name="aluno_saldo_devedor_nao_negativo",
+            ),
+            models.CheckConstraint(
+                check=models.Q(valor_hora__isnull=True) | models.Q(valor_hora__gt=0),
+                name="aluno_valor_hora_nulo_ou_positivo",
+            ),
         ]
         indexes = [
             models.Index(fields=["professor", "nome"], name="idx_aluno_professor_nome"),

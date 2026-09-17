@@ -1,6 +1,9 @@
+from decimal import Decimal
+
 import pytest
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 
 from alunos.models import Aluno
 
@@ -88,3 +91,40 @@ class TestConsultarAlunos:
         conteudo = response.content.decode()
         assert "Ana Souza" in conteudo
         assert "Bruno Lima" not in conteudo
+
+
+class TestConstraintsAluno:
+    """Task 31780 — constraints de integridade do cadastro de alunos."""
+
+    def test_banco_rejeita_saldo_devedor_negativo(self, professor):
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                Aluno.objects.create(
+                    professor=professor,
+                    nome="Saldo Inválido",
+                    cpf="44444444444",
+                    telefone="83994444444",
+                    saldo_devedor=Decimal("-0.01"),
+                )
+
+    def test_banco_rejeita_valor_hora_zero(self, professor):
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                Aluno.objects.create(
+                    professor=professor,
+                    nome="Valor Inválido",
+                    cpf="55555555555",
+                    telefone="83995555555",
+                    valor_hora=Decimal("0.00"),
+                )
+
+    def test_banco_rejeita_cpf_duplicado_para_o_mesmo_professor(self, professor):
+        criar_aluno(professor, cpf="66666666666")
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                Aluno.objects.create(
+                    professor=professor,
+                    nome="CPF Duplicado",
+                    cpf="66666666666",
+                    telefone="83996666666",
+                )

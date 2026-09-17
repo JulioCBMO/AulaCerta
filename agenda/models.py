@@ -62,6 +62,12 @@ class Aula(models.Model):
 
     class Meta:
         ordering = ["data_hora_inicio"]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(duracao_minutos__gt=0),
+                name="aula_duracao_positiva",
+            ),
+        ]
         indexes = [
             models.Index(fields=["professor", "data_hora_inicio"], name="idx_aula_professor_data"),
             models.Index(fields=["aluno", "status"], name="idx_aula_aluno_status"),
