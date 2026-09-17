@@ -31,6 +31,12 @@ class Mensalidade(models.Model):
 
     class Meta:
         ordering = ["-competencia"]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(valor_total__gt=0),
+                name="mensalidade_valor_total_positivo",
+            ),
+        ]
         indexes = [
             models.Index(fields=["aluno", "status"], name="idx_mensalidade_aluno_status"),
             models.Index(fields=["data_vencimento", "status"], name="idx_mensalidade_venc_status"),
@@ -83,6 +89,12 @@ class Pagamento(models.Model):
 
     class Meta:
         ordering = ["-data_registro"]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(valor_pago__gt=0),
+                name="pagamento_valor_pago_positivo",
+            ),
+        ]
 
     def __str__(self):
         return f"Pagamento de R$ {self.valor_pago} — {self.mensalidade}"

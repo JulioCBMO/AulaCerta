@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from agenda.models import Aula
@@ -91,3 +92,17 @@ class TestRegistrarAulaRealizada:
         aula = criar_aula(professor, aluno_ativo)
         with pytest.raises(ValidationError):
             aula.registrar_como_realizada(conteudo_trabalhado="Texto curto")
+
+
+class TestConstraintsAula:
+    """Task 31780 — constraints de integridade da agenda."""
+
+    def test_banco_rejeita_aula_com_duracao_zero(self, professor, aluno_ativo):
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                Aula.objects.create(
+                    professor=professor,
+                    aluno=aluno_ativo,
+                    data_hora_inicio=timezone.now() + timedelta(days=1),
+                    duracao_minutos=0,
+                )

@@ -4,6 +4,7 @@ from decimal import Decimal
 import pytest
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from alunos.models import Aluno
@@ -124,3 +125,22 @@ class TestIdentificarInadimplentes:
             .exclude(status=Mensalidade.Status.PAGO)
         )
         assert total == Decimal("300.00")
+
+
+class TestConstraintsFinanceiro:
+    """Task 31780 — constraints de integridade financeira."""
+
+    def test_banco_rejeita_mensalidade_com_valor_zero(self, aluno):
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                criar_mensalidade(aluno, valor=Decimal("0.00"))
+
+    def test_banco_rejeita_pagamento_com_valor_zero(self, aluno):
+        mensalidade = criar_mensalidade(aluno)
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                Pagamento.objects.create(
+                    mensalidade=mensalidade,
+                    valor_pago=Decimal("0.00"),
+                    forma_pagamento=Pagamento.FormaPagamento.PIX,
+                )
