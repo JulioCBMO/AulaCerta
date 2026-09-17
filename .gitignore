@@ -9,3 +9,5 @@ venv/
 
 staticfiles/*
 !staticfiles/.gitkeep
+.vercel
+.env*
