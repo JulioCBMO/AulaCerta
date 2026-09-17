@@ -19,6 +19,11 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
+# A Vercel publica cada deploy em um subdomínio diferente de vercel.app.
+# O ponto inicial libera o domínio principal e todos os seus subdomínios.
+if ".vercel.app" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(".vercel.app")
+
 # O Render injeta automaticamente RENDER_EXTERNAL_HOSTNAME (algo como
 # "aulacerta.onrender.com") em todo Web Service. Adicionamos esse host
 # automaticamente para não precisar repeti-lo manualmente na variável
@@ -32,6 +37,8 @@ if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+if "https://*.vercel.app" not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append("https://*.vercel.app")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
