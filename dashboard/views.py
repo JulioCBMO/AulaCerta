@@ -1,13 +1,19 @@
+import re
+from datetime import date
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
 from agenda.models import Aula
 from alunos.models import Aluno
+from dashboard.models import IndicadorFinanceiro
 from financeiro.models import Mensalidade
 
 DIAS_TOLERANCIA_INADIMPLENCIA = 5
+PADRAO_COMPETENCIA = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 
 
 @login_required
@@ -69,3 +75,73 @@ def index(request):
         "mes_referencia": inicio_mes,
     }
     return render(request, "dashboard/index.html", contexto)
+
+
+def _competencia_solicitada(valor):
+    """Converte YYYY-MM para o primeiro dia da competência."""
+    if valor is None:
+        return timezone.localdate().replace(day=1)
+    if not PADRAO_COMPETENCIA.fullmatch(valor):
+        raise ValueError("Competência deve estar no formato YYYY-MM.")
+
+    ano, mes = (int(parte) for parte in valor.split("-"))
+    try:
+        return date(ano, mes, 1)
+    except ValueError as erro:
+        raise ValueError("Competência deve estar no formato YYYY-MM.") from erro
+
+
+def _payload_zerado(competencia):
+    return {
+        "competencia": competencia.strftime("%Y-%m"),
+        "total_mensalidades": 0,
+        "faturamento_gerado": "0.00",
+        "valor_total_pago": "0.00",
+        "valor_pendente": "0.00",
+        "total_pendentes": 0,
+        "total_vencidas": 0,
+        "indice_inadimplencia": "0.0",
+    }
+
+
+def estatisticas_dashboard(request):
+    """Task 31773 - endpoint autenticado de indicadores financeiros."""
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"erro": "Autenticação necessária."},
+            status=401,
+        )
+
+    if request.method != "GET":
+        resposta = JsonResponse(
+            {"erro": "Método não permitido. Utilize GET."},
+            status=405,
+        )
+        resposta["Allow"] = "GET"
+        return resposta
+
+    try:
+        competencia = _competencia_solicitada(request.GET.get("competencia"))
+    except ValueError as erro:
+        return JsonResponse({"erro": str(erro)}, status=400)
+
+    indicador = IndicadorFinanceiro.objects.filter(
+        professor_id=request.user.pk,
+        competencia=competencia,
+    ).first()
+
+    if indicador is None:
+        return JsonResponse(_payload_zerado(competencia))
+
+    return JsonResponse(
+        {
+            "competencia": competencia.strftime("%Y-%m"),
+            "total_mensalidades": indicador.total_mensalidades,
+            "faturamento_gerado": f"{indicador.faturamento_gerado:.2f}",
+            "valor_total_pago": f"{indicador.valor_total_pago:.2f}",
+            "valor_pendente": f"{indicador.valor_pendente:.2f}",
+            "total_pendentes": indicador.total_pendentes,
+            "total_vencidas": indicador.total_vencidas,
+            "indice_inadimplencia": f"{indicador.indice_inadimplencia:.1f}",
+        }
+    )

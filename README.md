@@ -194,6 +194,34 @@ Ela pode ser consultada pelo modelo não gerenciado
 `dashboard.models.IndicadorFinanceiro`; sua integração com o endpoint do
 Dashboard pertence à Task 31773.
 
+## Endpoint de estatísticas do Dashboard
+
+A Task 31773 disponibiliza os dados da View pelo endpoint autenticado:
+
+```text
+GET /api/dashboard/estatisticas/?competencia=YYYY-MM
+```
+
+Quando `competencia` não é informada, o endpoint utiliza o mês atual. A
+resposta contém os totais consolidados do professor autenticado; meses sem
+dados retornam a mesma estrutura preenchida com zeros. Valores monetários e
+percentuais são serializados como strings decimais para preservar precisão.
+
+Exemplo de resposta:
+
+```json
+{
+  "competencia": "2026-09",
+  "total_mensalidades": 3,
+  "faturamento_gerado": "450.00",
+  "valor_total_pago": "300.00",
+  "valor_pendente": "150.00",
+  "total_pendentes": 1,
+  "total_vencidas": 0,
+  "indice_inadimplencia": "33.3"
+}
+```
+
 ## Observações de escopo (o que fica para as próximas sprints)
 
 Alguns fluxos foram deliberadamente simplificados na Sprint 01 porque
