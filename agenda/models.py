@@ -119,12 +119,35 @@ class Aula(models.Model):
 
     def registrar_como_realizada(self, conteudo_trabalhado, observacoes=""):
         """Task 31621 — Registrar aula realizada (CA-REG-02)."""
+        if self.status != self.Status.AGENDADA:
+            raise ValidationError(
+                {"status": "Somente aulas agendadas podem ser registradas como realizadas."}
+            )
+
+        conteudo_trabalhado = (conteudo_trabalhado or "").strip()
+        if len(conteudo_trabalhado) < 50:
+            raise ValidationError(
+                {
+                    "conteudo_trabalhado": (
+                        "O conteúdo ministrado deve ter pelo menos 50 caracteres."
+                    )
+                }
+            )
+
         self.status = self.Status.REALIZADA
         self.conteudo_trabalhado = conteudo_trabalhado
-        self.observacoes = observacoes
-        self.full_clean()
+        self.observacoes = (observacoes or "").strip()
         self.data_registro = timezone.now()
-        self.save()
+        self.full_clean()
+        self.save(
+            update_fields=[
+                "status",
+                "conteudo_trabalhado",
+                "observacoes",
+                "data_registro",
+                "updated_at",
+            ]
+        )
         return self
 
     def registrar_falta(self, justificada, observacoes=""):

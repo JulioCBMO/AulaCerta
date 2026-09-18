@@ -11,6 +11,12 @@
         {% if aula.conteudo_trabalhado %}
             <p class="mb-1"><strong>Conteúdo trabalhado:</strong> {{ aula.conteudo_trabalhado }}</p>
         {% endif %}
+        {% if aula.observacoes %}
+            <p class="mb-1"><strong>Observações pedagógicas:</strong> {{ aula.observacoes }}</p>
+        {% endif %}
+        {% if aula.data_registro %}
+            <p class="mb-1"><strong>Registrada em:</strong> {{ aula.data_registro|date:"d/m/Y H:i" }}</p>
+        {% endif %}
         {% if aula.tipo_falta %}
             <p class="mb-1"><strong>Tipo de falta:</strong> {{ aula.tipo_falta }}</p>
         {% endif %}
