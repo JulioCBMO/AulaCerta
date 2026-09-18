@@ -396,6 +396,151 @@ textarea:focus-visible,
   margin-top: 0.4rem;
 }
 
+/* ---------- Gráficos do painel ---------- */
+
+.dashboard-charts {
+  background:
+    linear-gradient(135deg, rgba(228, 169, 59, 0.08), transparent 38%),
+    var(--ac-papel-2);
+  border: 1px solid var(--ac-linha);
+  border-radius: var(--bs-border-radius-lg);
+  padding: 1.35rem;
+}
+
+.dashboard-charts__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
+  margin-bottom: 0.55rem;
+  border-bottom: 1px dashed var(--ac-linha);
+}
+
+.dashboard-charts__eyebrow {
+  color: var(--ac-ambar);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-charts__subtitle,
+.chart-card__description {
+  color: var(--ac-tinta-suave);
+  font-size: 0.86rem;
+}
+
+.dashboard-charts__filter {
+  flex: 0 0 190px;
+}
+
+.dashboard-charts__feedback {
+  min-height: 1.5rem;
+  margin-bottom: 0.65rem;
+  color: var(--ac-tinta-suave);
+  font-size: 0.82rem;
+}
+
+.dashboard-charts__feedback[data-state="loading"]::before {
+  content: "";
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin-right: 0.45rem;
+  border: 2px solid var(--ac-linha);
+  border-top-color: var(--ac-giz-escuro);
+  border-radius: 50%;
+  animation: dashboard-spin 0.8s linear infinite;
+}
+
+@keyframes dashboard-spin {
+  to { transform: rotate(360deg); }
+}
+
+.dashboard-charts__empty {
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  text-align: center;
+  color: var(--ac-tinta-suave);
+}
+
+.dashboard-charts__empty[hidden] {
+  display: none;
+}
+
+.dashboard-charts__empty-mark {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border: 1px dashed var(--ac-linha);
+  border-radius: 50%;
+  color: var(--ac-ambar);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.5rem;
+}
+
+.chart-card {
+  height: 100%;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ac-linha);
+  border-radius: var(--bs-border-radius);
+  background-color: rgba(255, 255, 255, 0.72);
+}
+
+.chart-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.chart-card__title {
+  margin: 0 0 0.15rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.chart-card__description {
+  margin: 0;
+}
+
+.chart-card__canvas {
+  position: relative;
+  height: 280px;
+}
+
+.chart-card__canvas--compact {
+  max-width: 340px;
+  margin-inline: auto;
+}
+
+@media (max-width: 575.98px) {
+  .dashboard-charts {
+    padding: 1rem;
+  }
+
+  .dashboard-charts__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-charts__filter {
+    flex-basis: auto;
+  }
+
+  .chart-card__canvas {
+    height: 245px;
+  }
+}
+
 /* ---------- Tela de login (fora do app-shell) ---------- */
 
 .auth-shell {

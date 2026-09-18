@@ -222,6 +222,19 @@ Exemplo de resposta:
 }
 ```
 
+## Componentes gráficos do Dashboard
+
+A Task 31774 adiciona dois gráficos responsivos ao painel:
+
+- barras para faturamento, valor recebido e valor pendente;
+- rosca para mensalidades pagas, pendentes e vencidas.
+
+O seletor de competência consulta o endpoint da Task 31773 sem recarregar a
+página. A interface também oferece estados de carregamento, ausência de
+dados e erro, além de um resumo textual atualizado para tecnologias
+assistivas. Os gráficos usam Chart.js 4.4.7 e a lógica de integração fica em
+`static/js/dashboard-charts.js`.
+
 ## Observações de escopo (o que fica para as próximas sprints)
 
 Alguns fluxos foram deliberadamente simplificados na Sprint 01 porque

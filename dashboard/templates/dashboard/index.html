@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Painel — AulaCerta{% endblock %}
 {% block content %}
 <h2>Painel — {{ mes_referencia|date:"F/Y" }}</h2>
@@ -43,9 +44,96 @@
     </div>
 </div>
 
+<section class="dashboard-charts mb-4"
+         id="dashboard-charts"
+         data-estatisticas-url="{% url 'dashboard:estatisticas' %}"
+         aria-labelledby="dashboard-charts-title"
+         aria-busy="true">
+    <div class="dashboard-charts__header">
+        <div>
+            <div class="dashboard-charts__eyebrow">Leitura financeira</div>
+            <h3 id="dashboard-charts-title" class="mb-1">Indicadores da competência</h3>
+            <p class="dashboard-charts__subtitle mb-0">
+                Compare faturamento, recebimentos e situação das mensalidades.
+            </p>
+        </div>
+        <div class="dashboard-charts__filter">
+            <label class="form-label" for="dashboard-competencia">Competência</label>
+            <input class="form-control"
+                   type="month"
+                   id="dashboard-competencia"
+                   value="{{ mes_referencia|date:'Y-m' }}"
+                   aria-describedby="dashboard-charts-feedback">
+        </div>
+    </div>
+
+    <div class="dashboard-charts__feedback"
+         id="dashboard-charts-feedback"
+         role="status"
+         aria-live="polite">
+        Carregando indicadores…
+    </div>
+
+    <div class="alert alert-danger mb-3" id="dashboard-charts-error" role="alert" hidden>
+        Não foi possível carregar os indicadores. Tente novamente.
+    </div>
+
+    <div class="dashboard-charts__empty" id="dashboard-charts-empty" hidden>
+        <div class="dashboard-charts__empty-mark" aria-hidden="true">—</div>
+        <strong>Nenhum dado financeiro nesta competência</strong>
+        <span>Selecione outro mês para consultar os indicadores.</span>
+    </div>
+
+    <div class="row g-3" id="dashboard-charts-content" hidden>
+        <div class="col-lg-7">
+            <article class="chart-card">
+                <header class="chart-card__header">
+                    <div>
+                        <h4 class="chart-card__title">Movimentação financeira</h4>
+                        <p class="chart-card__description">Valores consolidados em reais</p>
+                    </div>
+                </header>
+                <div class="chart-card__canvas">
+                    <canvas id="dashboard-financeiro-chart"
+                            role="img"
+                            aria-label="Gráfico de barras com faturamento, valor pago e valor pendente"></canvas>
+                </div>
+            </article>
+        </div>
+        <div class="col-lg-5">
+            <article class="chart-card">
+                <header class="chart-card__header">
+                    <div>
+                        <h4 class="chart-card__title">Situação das mensalidades</h4>
+                        <p class="chart-card__description">Distribuição por status</p>
+                    </div>
+                </header>
+                <div class="chart-card__canvas chart-card__canvas--compact">
+                    <canvas id="dashboard-mensalidades-chart"
+                            role="img"
+                            aria-label="Gráfico de rosca com mensalidades pagas, pendentes e vencidas"></canvas>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <p class="visually-hidden" id="dashboard-charts-summary" aria-live="polite"></p>
+
+    <noscript>
+        <div class="alert alert-warning mb-0">
+            Ative o JavaScript para visualizar os gráficos financeiros.
+        </div>
+    </noscript>
+</section>
+
 <div class="d-flex gap-2">
     <a href="{% url 'alunos:listar' %}" class="btn btn-outline-primary">Alunos</a>
     <a href="{% url 'agenda:listar' %}" class="btn btn-outline-primary">Agenda</a>
     <a href="{% url 'financeiro:mensalidades' %}" class="btn btn-outline-primary">Financeiro</a>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+<script src="{% static 'js/dashboard-charts.js' %}" defer></script>
 {% endblock %}

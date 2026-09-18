@@ -4,6 +4,7 @@ from io import StringIO
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.contrib.staticfiles import finders
 from django.core.management import call_command
 from django.db import connection
 from django.urls import reverse
@@ -282,3 +283,40 @@ class TestEndpointEstatisticasDashboard:
         assert resposta.json()["faturamento_gerado"] == "500.00"
         assert resposta.json()["valor_pendente"] == "500.00"
         assert resposta.json()["indice_inadimplencia"] == "100.0"
+
+
+@pytest.mark.django_db
+class TestComponentesGraficosDashboard:
+    """Task 31774 - Componentes graficos do Dashboard."""
+
+    def test_dashboard_renderiza_estrutura_dos_graficos(
+        self, client, indicadores, monkeypatch
+    ):
+        professor, _, _ = indicadores
+        client.force_login(professor)
+        monkeypatch.setattr(
+            "dashboard.views.timezone.localdate",
+            lambda: date(2026, 9, 18),
+        )
+
+        resposta = client.get(reverse("dashboard:index"))
+
+        assert resposta.status_code == 200
+        assert resposta.context["mes_referencia"] == date(2026, 9, 1)
+        assert b'id="dashboard-charts"' in resposta.content
+        assert b'data-estatisticas-url="/api/dashboard/estatisticas/"' in resposta.content
+        assert b'id="dashboard-competencia"' in resposta.content
+        assert b'value="2026-09"' in resposta.content
+        assert b'id="dashboard-financeiro-chart"' in resposta.content
+        assert b'id="dashboard-mensalidades-chart"' in resposta.content
+        assert b'id="dashboard-charts-summary"' in resposta.content
+
+    def test_dashboard_carrega_dependencias_dos_graficos(self, client, indicadores):
+        professor, _, _ = indicadores
+        client.force_login(professor)
+
+        resposta = client.get(reverse("dashboard:index"))
+
+        assert b"chart.js@4.4.7" in resposta.content
+        assert b"/static/js/dashboard-charts.js" in resposta.content
+        assert finders.find("js/dashboard-charts.js") is not None
