@@ -170,7 +170,29 @@ descritos no backlog para cada User Story da Sprint 01:
   transacional com recálculo de saldo) e CA-INA-01/02 (identificação e
   agregação de inadimplência).
 - `dashboard/tests.py` — Task 31780 (criação dos dados da Sprint 01 e
-  idempotência do comando `seed_sprint1`).
+  idempotência do comando `seed_sprint1`) e Task 31772 (existência,
+  agregação e isolamento da View SQL de indicadores financeiros).
+
+## View de indicadores financeiros
+
+A migration `dashboard.0001_indicadores_financeiros_view` cria a View
+somente de leitura `dashboard_indicadores_financeiros`. Ela consolida os
+dados por professor e competência e expõe os seguintes campos:
+
+- `total_mensalidades`;
+- `faturamento_gerado`;
+- `valor_total_pago`;
+- `valor_pendente`;
+- `total_pendentes`;
+- `total_vencidas`;
+- `indice_inadimplencia`.
+
+Os pagamentos são somados por mensalidade antes da agregação principal,
+evitando que pagamentos parciais dupliquem o faturamento. A View funciona
+no PostgreSQL/Neon usado em produção e no SQLite utilizado pelos testes.
+Ela pode ser consultada pelo modelo não gerenciado
+`dashboard.models.IndicadorFinanceiro`; sua integração com o endpoint do
+Dashboard pertence à Task 31773.
 
 ## Observações de escopo (o que fica para as próximas sprints)
 
