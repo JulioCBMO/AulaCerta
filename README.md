@@ -235,6 +235,26 @@ dados e erro, além de um resumo textual atualizado para tecnologias
 assistivas. Os gráficos usam Chart.js 4.4.7 e a lógica de integração fica em
 `static/js/dashboard-charts.js`.
 
+## Validação de consistência dos indicadores
+
+A Task 31775 acrescenta testes de integração entre as mensalidades e os
+pagamentos de origem, a View financeira, o endpoint e os cards do painel.
+A cobertura verifica isolamento por professor e competência, pagamentos
+parciais, múltiplos pagamentos na mesma mensalidade, atualização imediata
+dos totais e as seguintes invariantes:
+
+- valor pago + valor pendente = faturamento da competência;
+- pagas + pendentes no prazo + vencidas = total de mensalidades;
+- índice de inadimplência permanece entre 0% e 100%.
+
+Os testes também garantem que os cards utilizem somente a competência do
+mês atual, sem incorporar cobranças de meses futuros. A validação específica
+pode ser executada com:
+
+```bash
+pytest dashboard/test_consistencia.py -q
+```
+
 ## Observações de escopo (o que fica para as próximas sprints)
 
 Alguns fluxos foram deliberadamente simplificados na Sprint 01 porque

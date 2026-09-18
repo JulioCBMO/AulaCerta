@@ -44,7 +44,7 @@ def index(request):
 
     mensalidades_periodo = Mensalidade.objects.filter(
         aluno__professor=professor,
-        competencia__gte=inicio_mes,
+        competencia=inicio_mes,
     )
     faturamento_gerado = mensalidades_periodo.aggregate(total=Sum("valor_total"))["total"] or 0
 
