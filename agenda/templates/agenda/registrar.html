@@ -4,7 +4,7 @@
 <h2 class="mb-4">Registrar aula realizada</h2>
 <p class="text-muted">Aluno: {{ aula.aluno.nome }} — {{ aula.data_hora_inicio|date:"d/m/Y H:i" }}</p>
 
-<form method="post" novalidate>
+<form method="post">
     {% csrf_token %}
     {% if form.non_field_errors %}
         <div class="alert alert-danger">{{ form.non_field_errors }}</div>
@@ -12,13 +12,35 @@
     <div class="mb-3">
         <label class="form-label">{{ form.conteudo_trabalhado.label }}</label>
         {{ form.conteudo_trabalhado }}
+        <div id="conteudo-contador" class="form-text" aria-live="polite">0/50 caracteres</div>
         <div class="text-danger small">{{ form.conteudo_trabalhado.errors }}</div>
     </div>
     <div class="mb-3">
         <label class="form-label">Observações</label>
         {{ form.observacoes }}
+        <div class="text-danger small">{{ form.observacoes.errors }}</div>
     </div>
-    <button type="submit" class="btn btn-success">Concluir</button>
+    <button id="btn-concluir" type="submit" class="btn btn-success" disabled>Concluir</button>
     <a href="{% url 'agenda:detalhe' aula.pk %}" class="btn btn-outline-secondary">Cancelar</a>
 </form>
+
+<script>
+(() => {
+    const campo = document.getElementById("{{ form.conteudo_trabalhado.id_for_label }}");
+    const contador = document.getElementById("conteudo-contador");
+    const botao = document.getElementById("btn-concluir");
+    const minimo = 50;
+
+    function atualizarValidacao() {
+        const quantidade = campo.value.trim().length;
+        contador.textContent = `${quantidade}/${minimo} caracteres`;
+        contador.classList.toggle("text-success", quantidade >= minimo);
+        contador.classList.toggle("text-danger", quantidade < minimo);
+        botao.disabled = quantidade < minimo;
+    }
+
+    campo.addEventListener("input", atualizarValidacao);
+    atualizarValidacao();
+})();
+</script>
 {% endblock %}

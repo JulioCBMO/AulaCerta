@@ -62,7 +62,7 @@ def registrar_aula_realizada(request, pk):
             except ValidationError as exc:
                 for field, errs in exc.message_dict.items():
                     for err in errs:
-                        form.add_error(None, err)
+                        form.add_error(field if field in form.fields else None, err)
             else:
                 messages.success(request, "Aula registrada como realizada.")
                 return redirect("agenda:detalhe", pk=aula.pk)

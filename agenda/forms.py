@@ -47,7 +47,14 @@ class RegistrarAulaForm(forms.Form):
     """Task 31621 — Registrar aula realizada (CA-REG-01)."""
 
     conteudo_trabalhado = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
+        widget=forms.Textarea(
+            attrs={
+                "rows": 4,
+                "class": "form-control",
+                "minlength": 50,
+                "aria-describedby": "conteudo-contador",
+            }
+        ),
         label="Conteúdo ministrado (mínimo 50 caracteres)",
     )
     observacoes = forms.CharField(
