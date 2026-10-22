@@ -6,6 +6,17 @@
     <a href="{% url 'alunos:editar' aluno.pk %}" class="btn btn-outline-primary">Editar</a>
 </div>
 
+{% if not aluno.is_ativo %}
+<div class="alert alert-secondary">Aluno inativo — novos agendamentos estão bloqueados. As aulas já agendadas foram mantidas.</div>
+{% endif %}
+
+{% if aluno.is_menor_de_idade and not aluno.responsavel_nome %}
+<div class="alert alert-warning">
+    Aluno menor de idade sem responsável cadastrado.
+    <a href="{% url 'alunos:editar' aluno.pk %}" class="alert-link">Completar cadastro</a>
+</div>
+{% endif %}
+
 <div class="row">
     <div class="col-md-6">
         <div class="card mb-3">
@@ -14,8 +25,12 @@
                 <p class="mb-1"><strong>CPF:</strong> {{ aluno.cpf }}</p>
                 <p class="mb-1"><strong>Telefone:</strong> {{ aluno.telefone }}</p>
                 <p class="mb-1"><strong>E-mail:</strong> {{ aluno.email|default:"—" }}</p>
-                <p class="mb-1"><strong>Disciplina:</strong> {{ aluno.disciplina|default:"—" }}</p>
+                <p class="mb-1"><strong>Data de nascimento:</strong>
+                    {% if aluno.data_nascimento %}{{ aluno.data_nascimento|date:"d/m/Y" }} ({{ aluno.idade }} anos){% else %}—{% endif %}
+                </p>
+                <p class="mb-1"><strong>Endereço:</strong> {{ aluno.endereco|default:"—" }}</p>
                 <p class="mb-1"><strong>Situação:</strong> {{ aluno.get_situacao_display }}</p>
+                <p class="mb-1"><strong>Valor-hora:</strong> {% if aluno.valor_hora %}R$ {{ aluno.valor_hora }}{% else %}padrão do professor{% endif %}</p>
                 <p class="mb-0"><strong>Saldo devedor:</strong> R$ {{ aluno.saldo_devedor }}</p>
             </div>
         </div>
@@ -23,16 +38,64 @@
     <div class="col-md-6">
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">Próximas aulas</h5>
-                <ul class="list-group list-group-flush">
-                    {% for aula in proximas_aulas %}
-                        <li class="list-group-item">{{ aula.data_hora_inicio|date:"d/m/Y H:i" }} — {{ aula.get_modalidade_display }}</li>
-                    {% empty %}
-                        <li class="list-group-item text-muted">Nenhuma aula agendada.</li>
-                    {% endfor %}
-                </ul>
+                <h5 class="card-title">Dados acadêmicos</h5>
+                <p class="mb-1"><strong>Disciplina:</strong> {{ aluno.disciplina|default:"—" }}</p>
+                <p class="mb-1"><strong>Série/nível:</strong> {{ aluno.serie_nivel|default:"—" }}</p>
+                <p class="mb-1"><strong>Escola:</strong> {{ aluno.escola|default:"—" }}</p>
+                <p class="mb-0"><strong>Observações:</strong> {{ aluno.observacoes|default:"—"|linebreaksbr }}</p>
             </div>
         </div>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Responsável</h5>
+                {% if aluno.tem_responsavel %}
+                    <p class="mb-1"><strong>Nome:</strong> {{ aluno.responsavel_nome|default:"—" }}</p>
+                    <p class="mb-1"><strong>Parentesco:</strong> {{ aluno.responsavel_parentesco|default:"—" }}</p>
+                    <p class="mb-1"><strong>Telefone:</strong> {{ aluno.responsavel_telefone|default:"—" }}</p>
+                    <p class="mb-0"><strong>E-mail:</strong> {{ aluno.responsavel_email|default:"—" }}</p>
+                {% else %}
+                    <p class="text-muted mb-0">Nenhum responsável cadastrado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Próximas aulas</h5>
+        <ul class="list-group list-group-flush">
+            {% for aula in proximas_aulas %}
+                <li class="list-group-item">
+                    <a href="{% url 'agenda:detalhe' aula.pk %}">{{ aula.data_hora_inicio|date:"d/m/Y H:i" }}</a> — {{ aula.get_modalidade_display }}
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">Nenhuma aula agendada.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Histórico de aulas realizadas
+            {% if total_aulas_realizadas %}<small class="text-muted">— últimas {{ historico_aulas|length }} de {{ total_aulas_realizadas }}</small>{% endif %}
+        </h5>
+        {% for aula in historico_aulas %}
+            <div class="border-top pt-3 mt-3">
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <a href="{% url 'agenda:detalhe' aula.pk %}"><strong>{{ aula.data_hora_inicio|date:"d/m/Y H:i" }}</strong></a>
+                    {% if aula.avaliacao_desempenho %}
+                        <span class="badge text-bg-light border">Desempenho: {{ aula.get_avaliacao_desempenho_display }}</span>
+                    {% endif %}
+                </div>
+                <p class="mb-1 mt-1">{{ aula.conteudo_trabalhado|truncatechars:200 }}</p>
+                {% if aula.material_utilizado %}<p class="mb-1 small"><strong>Material:</strong> {{ aula.material_utilizado }}</p>{% endif %}
+                {% if aula.recomendacoes %}<p class="mb-0 small"><strong>Recomendações:</strong> {{ aula.recomendacoes }}</p>{% endif %}
+            </div>
+        {% empty %}
+            <p class="text-muted mb-0">Nenhuma aula realizada ainda.</p>
+        {% endfor %}
     </div>
 </div>
 
